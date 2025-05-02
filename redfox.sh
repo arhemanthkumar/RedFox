@@ -138,7 +138,6 @@ search_folder() {
 
 
 
-
 # List docker files
 list_docker_files() {
     echo ""
@@ -255,25 +254,24 @@ folder_menu() {
                 fi
                 ;;
             9)
-	        
-    		if [ "$CURRENT_DIR" = "$BASE_DIR" ]; then
-        	    cecho $YELLOW "Already at the root base directory. Returning to main menu."
-        	    break
-    		elif [ ${#DIR_STACK[@]} -gt 0 ]; then
-        	    CURRENT_DIR="${DIR_STACK[-1]}"
-        	    unset 'DIR_STACK[-1]'
-        	    if [ ${#DIR_STACK[@]} -eq 0 ]; then
-            	        # After popping, stack is empty => we are at BASE_DIR now
-            	        CURRENT_DIR="$BASE_DIR"
-            	        cecho $YELLOW "Already at the root base directory after going back. Returning to main menu."
-            	        break
-        	    fi
-    		else
-        	    CURRENT_DIR="$BASE_DIR"
-        	    cecho $YELLOW "Already at the root level (stack empty). Returning to main menu."
-        	    break
-    		fi
-    		;;
+                if [ "$CURRENT_DIR" = "$BASE_DIR" ]; then
+                    cecho $YELLOW "Already at the root base directory. Returning to main menu."
+                    break
+                elif [ ${#DIR_STACK[@]} -gt 0 ]; then
+                    CURRENT_DIR="${DIR_STACK[-1]}"
+                    unset 'DIR_STACK[-1]'
+                    if [ ${#DIR_STACK[@]} -eq 0 ]; then
+                            # After popping, stack is empty => we are at BASE_DIR now
+                            CURRENT_DIR="$BASE_DIR"
+                            cecho $YELLOW "Already at the root base directory after going back. Returning to main menu."
+                            break
+                    fi
+                else
+                    CURRENT_DIR="$BASE_DIR"
+                    cecho $YELLOW "Already at the root level (stack empty). Returning to main menu."
+                    break
+                fi
+                ;;
 
 
             0)
@@ -291,6 +289,7 @@ folder_menu() {
         esac
     done
 }
+
 
 # Main menu
 main_menu() {
