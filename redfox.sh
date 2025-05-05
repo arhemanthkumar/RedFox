@@ -2,6 +2,7 @@
 
 clear
 
+
 # ===== Colors =====
 RED='\033[1;38;5;196m'
 ORANGE='\033[38;5;208m'
@@ -105,38 +106,21 @@ list_folders() {
 }
 
 
-# Search folders by partial inputs
+
+# Search folders by partial match
 search_folder() {
-    # Ask for keyword
-    keyword=$(gum input --placeholder "Enter part of the folder name to search") || return
+    read -p "Enter part of the folder name to search: " keyword
+    matches=$(find "$BASE_DIR" -type d -iname "*$keyword*" -print)
 
-    # Check if keyword is empty
-    if [ -z "$keyword" ]; then
-        cecho $RED "No keyword entered. Returning to menu."
-        return
-    fi
-
-    # Find matching folders
-    mapfile -t matches < <(find "$BASE_DIR" -type d -iname "*$keyword*" 2>/dev/null)
-
-    # Check if anything found
-    if [ ${#matches[@]} -eq 0 ]; then
+    if [ -z "$matches" ]; then
         cecho $RED "No matching folders found!"
         return
     fi
 
-    # Show selection with gum
-    selected=$(printf "%s\n" "${matches[@]}" | gum choose --height=15)
-
-    # If user selected something valid
-    if [ -n "$selected" ] && [ -d "$selected" ]; then
-        folder_menu "$selected"
-    else
-        cecho $RED "No valid selection made."
-    fi
+    echo ""
+    cecho $YELLOW "Matching folders:"
+    echo "$matches"
 }
-
-
 
 # List docker files
 list_docker_files() {
@@ -254,24 +238,25 @@ folder_menu() {
                 fi
                 ;;
             9)
-                if [ "$CURRENT_DIR" = "$BASE_DIR" ]; then
-                    cecho $YELLOW "Already at the root base directory. Returning to main menu."
-                    break
-                elif [ ${#DIR_STACK[@]} -gt 0 ]; then
-                    CURRENT_DIR="${DIR_STACK[-1]}"
-                    unset 'DIR_STACK[-1]'
-                    if [ ${#DIR_STACK[@]} -eq 0 ]; then
-                            # After popping, stack is empty => we are at BASE_DIR now
-                            CURRENT_DIR="$BASE_DIR"
-                            cecho $YELLOW "Already at the root base directory after going back. Returning to main menu."
-                            break
-                    fi
-                else
-                    CURRENT_DIR="$BASE_DIR"
-                    cecho $YELLOW "Already at the root level (stack empty). Returning to main menu."
-                    break
-                fi
-                ;;
+	        
+    		if [ "$CURRENT_DIR" = "$BASE_DIR" ]; then
+        	    cecho $YELLOW "Already at the root base directory. Returning to main menu."
+        	    break
+    		elif [ ${#DIR_STACK[@]} -gt 0 ]; then
+        	    CURRENT_DIR="${DIR_STACK[-1]}"
+        	    unset 'DIR_STACK[-1]'
+        	    if [ ${#DIR_STACK[@]} -eq 0 ]; then
+            	        # After popping, stack is empty => we are at BASE_DIR now
+            	        CURRENT_DIR="$BASE_DIR"
+            	        cecho $YELLOW "Already at the root base directory after going back. Returning to main menu."
+            	        break
+        	    fi
+    		else
+        	    CURRENT_DIR="$BASE_DIR"
+        	    cecho $YELLOW "Already at the root level (stack empty). Returning to main menu."
+        	    break
+    		fi
+    		;;
 
 
             0)
@@ -289,7 +274,6 @@ folder_menu() {
         esac
     done
 }
-
 
 # Main menu
 main_menu() {
@@ -318,7 +302,6 @@ main_menu() {
                 fi
                 ;;
             2)
-		echo "DEBUG: search_folder running..."
                 search_folder
                 ;;
             3)
